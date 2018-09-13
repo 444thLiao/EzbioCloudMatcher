@@ -4,7 +4,7 @@
 import sys
 import os
 
-from WebSeqMatch import EzbioCloudMatch
+from WebSeqMatch import EzbioCloudMatch, LogIn
 from WebSeqMatch import Sequence
 
 def RetrieveAllSeqFiles(folder):
@@ -51,11 +51,10 @@ def AddMatchToCSV(name, seqMatch, file):
 
 def Run():
     # 获取序列
-    # if len(sys.argv) < 2:
-    #     print('please input the folder containing sequence files(*.txt)')
-    #     return -1
-    # seqFolder = sys.argv[1] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
-    seqFolder = r'C:\Users\vc\Desktop\New folder (2)\seq'
+    if len(sys.argv) < 2:
+        print(r'please input the folder containing sequence files(*.txt)')
+        return -1
+    seqFolder = sys.argv[1] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
     
@@ -64,9 +63,15 @@ def Run():
     if os.path.exists(outputFile):
         os.remove(outputFile) # 在每次的运行前删除该文件
 
+    # 登录账户    
+    match = LogIn(username=r'734851667@qq.com', password=r'wen565') # 在此处输入网站的用户名及密码
+    if not match:
+        print(r'fail to log in the EzbioCloud.net')
+        return -1
+
+    # 开始匹配
     count = 0
-    for seq in seqs:
-        match = EzbioCloudMatch()
+    for seq in seqs:        
         matchResult = match.MatchSeq(name=seq.name, seq=seq.seq)
         if matchResult:
             AddMatchToCSV(seq.name, matchResult, outputFile)
