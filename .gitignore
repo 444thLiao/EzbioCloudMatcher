@@ -1,4 +1,4 @@
 __pycache__
 WebSeqMatch\__pycache__
-.vscode/
-seq/
+seq
+.vscode

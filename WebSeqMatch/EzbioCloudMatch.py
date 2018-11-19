@@ -9,16 +9,48 @@ import time
 HOST = r'www.ezbiocloud.net'
 ACCEPT_LANGUAGE = r'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2'
 ACCEPT_ENCODING = r'gzip, deflate, br'
-REFERER = r'https://www.ezbiocloud.net/identify'        
+REFERER_MATCH = r'https://www.ezbiocloud.net/identify'
+REFERER_LOGIN = r'https://www.ezbiocloud.net/'
 X_REQUESTED_WITH = r'XMLHttpRequest'
 CONNECTION = r'keep-alive'
-X_CL_USER_UID = r'35460'
-COOKIE = r'_ga=GA1.2.1740934173.1535733637; userEmail=734851667%40qq.com; JSESSIONID=71985069B33310B43E60143047F9876E; _gid=GA1.2.1010954890.1535863506; ezbiocode=tCz%2FGaUbIQdFqReu8YQMt0K2pTcuEaGFk6OdRuFkP%2FE%3D; ezbiocode=tCz%2FGaUbIQdFqReu8YQMt0K2pTcuEaGFk6OdRuFkP%2FE%3D; AWSELB=635129310C4081566E44A10765D042FA56566D15A6ADB7B1860DA85A2A5CAA9D9AA0A47494E0586EBEBE4B5E1D2B779ACD4E675C76EEE0F7DC2D5BEB70B34F6D09BD6D3461; _gat=1'
 
+def LogIn(username, password):
+    headers = {
+        'Host': HOST,
+        # 'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0',
+        'Accept': r'*/*',
+        'Accept-Language': ACCEPT_LANGUAGE,
+        'Accept-Encoding': ACCEPT_ENCODING,
+        'Referer': REFERER_LOGIN,
+        'Content-Type': r'application/x-www-form-urlencoded; charset=UTF-8',
+        'x-cl-email': username,
+        'x-cl-userUId': r'0',
+        'X-Requested-With': X_REQUESTED_WITH,
+        # 'Content-Length': r'888',
+        # 'Cookie': self.__cookie,
+        'Connection': CONNECTION
+    }
+    data = 'txtID=%s&txtPWD=%s' % (username, password)
+    request = requests.post(r'https://www.ezbiocloud.net/loginNew', headers=headers, data=data)
+    if request.status_code != 200:
+        return None
+    cookies = ''
+    try:
+        for item in request.cookies:
+            cookies += r'%s=%s;' % (item.name, item.value)
+    except:
+        cookies = None
+    if not cookies:
+        return None
+    return EzbioCloudMatch(userEmail=username, cookies=cookies)
 
 class EzbioCloudMatch:
-    def __init__(self, userEmail=''):
+    def __init__(self, userEmail, cookies):
         self.__userEmail = userEmail
+        # self.__password = password
+        # self.__xClUserUId = r'35460'
+        # self.__cookie = r'_ga=GA1.2.1740934173.1535733637; userEmail=734851667%40qq.com; JSESSIONID=71985069B33310B43E60143047F9876E; _gid=GA1.2.1010954890.1535863506; ezbiocode=tCz%2FGaUbIQdFqReu8YQMt0K2pTcuEaGFk6OdRuFkP%2FE%3D; ezbiocode=tCz%2FGaUbIQdFqReu8YQMt0K2pTcuEaGFk6OdRuFkP%2FE%3D; AWSELB=635129310C4081566E44A10765D042FA56566D15A6ADB7B1860DA85A2A5CAA9D9AA0A47494E0586EBEBE4B5E1D2B779ACD4E675C76EEE0F7DC2D5BEB70B34F6D09BD6D3461; _gat=1'
+        self.__cookies = cookies
 
     def MatchSeq(self, name, seq):
         '''封装函数，主要的对外接口，其他函数用于'''
@@ -49,12 +81,12 @@ class EzbioCloudMatch:
             'Accept': r'application/json, text/javascript, */*; q=0.01',
             'Accept-Language': ACCEPT_LANGUAGE,
             'Accept-Encoding': ACCEPT_ENCODING,
-            'Referer': REFERER,
+            'Referer': REFERER_MATCH,
             'Content-Type': r'application/x-www-form-urlencoded; charset=UTF-8',
-            'x-cl-userUId': X_CL_USER_UID,
+            # 'x-cl-userUId': self.__xClUserUId,
             'X-Requested-With': X_REQUESTED_WITH,
             # 'Content-Length': r'888',
-            'Cookie': COOKIE,
+            'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
 
@@ -85,10 +117,10 @@ class EzbioCloudMatch:
             'Accept': r'application/json, text/javascript, */*; q=0.01',
             'Accept-Language': ACCEPT_LANGUAGE,
             'Accept-Encoding': ACCEPT_ENCODING,
-            'Referer': REFERER,
-            'x-cl-userUId': X_CL_USER_UID,
+            'Referer': REFERER_MATCH,
+            # 'x-cl-userUId': self.__xClUserUId,
             'X-Requested-With': X_REQUESTED_WITH,
-            'Cookie': COOKIE,
+            'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
         request = requests.get(r'https://www.ezbiocloud.net/cl16s/poll_job_status_multi?jobs=%s' % (id), headers=headers)
@@ -120,10 +152,10 @@ class EzbioCloudMatch:
             'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': ACCEPT_LANGUAGE,
             'Accept-Encoding': ACCEPT_ENCODING,
-            'Referer': REFERER,
-            'x-cl-userUId': X_CL_USER_UID,
+            'Referer': REFERER_MATCH,
+            # 'x-cl-userUId': self.__xClUserUId,
             'X-Requested-With': X_REQUESTED_WITH,
-            'Cookie': COOKIE,
+            'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
         request = requests.get(r'https://www.ezbiocloud.net/identify/result?id=%s' % (strainID), headers=headers)
@@ -140,6 +172,9 @@ class EzbioCloudMatch:
         return results.get('hits')
 
 if __name__ == '__main__':
-    match = EzbioloudMatch('sss')
-    res = match.MatchSeq(name='text25', seq=__seq)
-    print(res)
+    ddd = LogIn(r'734851667@qq.com', r'wen565')
+    seq = None
+    with open(r'D:\code\Python\EzbioCloudMatcher\seq\MCCC 1A01601.txt', 'r') as f:
+        seq = f.read()
+    matchResult = ddd.MatchSeq(r'test112', seq)
+    print(matchResult)
