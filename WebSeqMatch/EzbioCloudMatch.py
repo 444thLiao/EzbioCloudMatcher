@@ -14,6 +14,23 @@ REFERER_LOGIN = r'https://www.ezbiocloud.net/'
 X_REQUESTED_WITH = r'XMLHttpRequest'
 CONNECTION = r'keep-alive'
 
+'''
+Host: www.ezbiocloud.net
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0
+Accept: application/json, text/javascript, */*; q=0.01
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate, br
+Referer: https://www.ezbiocloud.net/login
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Content-Length: 50
+Connection: keep-alive
+Cookie: _ga=GA1.2.350938960.1535699516; JSESSIONID=1E2CC2555E232915C8EB0644672043E7; AWSALB=MNwfc3goXHH3uuH8KVCTQmJiiRxup+bHyyKHrieNy96o2lP463b1aeVQxyZmHIecW9o5nTdG/PzbQfM8BXLBcEulHH+3mFNxJpm0c5vE/D3ofw+NG8CnXQazIJme; _gid=GA1.2.435552233.1546954634; _gat=1
+Pragma: no-cache
+Cache-Control: no-cache
+TE: Trailers
+'''
+
 def LogIn(username, password):
     headers = {
         'Host': HOST,
@@ -31,7 +48,7 @@ def LogIn(username, password):
         'Connection': CONNECTION
     }
     data = 'txtID=%s&txtPWD=%s' % (username, password)
-    request = requests.post(r'https://www.ezbiocloud.net/loginNew', headers=headers, data=data)
+    request = requests.post(r'https://www.ezbiocloud.net/user/login', headers=headers, data=data)
     if request.status_code != 200:
         return None
     cookies = ''
@@ -59,11 +76,11 @@ class EzbioCloudMatch:
         if not id:
             return None
         # 查询序列完成的strainUid
-        time.sleep(3) # 等待提交的匹配完成
+        # time.sleep(3) # 等待提交的匹配完成
         strainUid = None
         count = 0
         for i in range(10): # 多次循环以等待完成
-            strainUid = self.GetStrainID(id)
+            strainUid = self.GetStrainID(id, name)
             if strainUid:
                 break
             else:
@@ -90,12 +107,12 @@ class EzbioCloudMatch:
             'Connection': CONNECTION
         }
 
-        data = r'jsonStr=%7B%22strain_name%22%3A%22' + name
+        data = r'jsonStr=%5B%7B%22strain_name%22%3A%22' + name
         data = data + r'%22%2C%22ssurrn_seq%22%3A%22'
         data = data + seq
-        data = data + r'%22%7D'    
+        data = data + r'%22%7D%5D'    
         request = requests.post(r'https://www.ezbiocloud.net/cl16s/submit_identify_data', headers=headers, data=data)
-        if request.status_code != 201:
+        if request.status_code < 200 or request.status_code >= 300:
             return None
         jsonStr = None
         try:
@@ -109,7 +126,7 @@ class EzbioCloudMatch:
             return None
         return int(id)
 
-    def GetStrainID(self, id):
+    def GetStrainID(self, id, nameVerify):
         '''将CommitSeq(name, seq)返回的工作id转换为strainID-通过该值获取到本次对比的详细结果'''
         headers={
             'Host': HOST,
@@ -123,7 +140,7 @@ class EzbioCloudMatch:
             'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
-        request = requests.get(r'https://www.ezbiocloud.net/cl16s/poll_job_status_multi?jobs=%s' % (id), headers=headers)
+        request = requests.get(r'https://www.ezbiocloud.net/cl16s/get_user_jobs?finished_up_to=%s' % (id), headers=headers) # 1546958535691
         if request.status_code != 200:
             return None
         jsonStr = None
@@ -133,16 +150,20 @@ class EzbioCloudMatch:
             pass
         if not jsonStr:
             return None
-        strainUid = jsonStr.get('jobs') # 此时jobUid为一个数组
-        if not strainUid or len(strainUid) < 1:
+        data = jsonStr.get('data') # 此时jobUid为一个数组
+        if not data or len(data) < 1:
             return None
-        strainUid = strainUid[0].get('doneData') # 
-        if not strainUid:
+        data = data[0]
+        status = data.get('status') # 
+        if not status or status != 'done':
             return None
-        strainUid = strainUid.get('strain_uid')
-        if not strainUid:
+        strainName = data.get('strain_name')
+        if not strainName or strainName != nameVerify:
             return None
-        return strainUid
+        sge_job_id = data.get('sge_job_id')
+        if not sge_job_id:
+            return None
+        return sge_job_id
 
     def GetMatchResults(self, strainID):
         '''通过GetStrainID(id)返回的strainID获取到匹配的详细结果, 最终返回由json转化来的dict'''
@@ -172,9 +193,4 @@ class EzbioCloudMatch:
         return results.get('hits')
 
 if __name__ == '__main__':
-    ddd = LogIn(r'734851667@qq.com', r'wen565')
-    seq = None
-    with open(r'D:\code\Python\EzbioCloudMatcher\seq\MCCC 1A01601.txt', 'r') as f:
-        seq = f.read()
-    matchResult = ddd.MatchSeq(r'test112', seq)
-    print(matchResult)
+    pass

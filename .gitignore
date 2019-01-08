@@ -2,3 +2,5 @@ __pycache__
 WebSeqMatch\__pycache__
 seq
 .vscode
+*.csv
+*.bat
