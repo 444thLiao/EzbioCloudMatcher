@@ -51,15 +51,12 @@ def AddMatchToCSV(name, seqMatch, file):
 
 def Run():
     # 获取序列
-    # if len(sys.argv) < 4:
-    #     print(r'please input the username, password and the folder name containing sequence files(*.txt)')
-    #     return -1
-    # username = sys.argv[1]
-    # password = sys.argv[2]
-    # seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
-    username = "qsl@vip.henu.edu.cn"
-    password = "123456789"
-    seqFolder = "seq" # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
+    if len(sys.argv) < 4:
+        print(r'please input the username, password and the folder name containing sequence files(*.txt)')
+        return -1
+    username = sys.argv[1]
+    password = sys.argv[2]
+    seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
 
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
