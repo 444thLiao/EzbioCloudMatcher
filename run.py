@@ -34,7 +34,7 @@ def AddMatchToCSV(name, seqMatch, file):
         for item in seqMatch:
             hitTaxonName = item['taxon_name']
             hitStrainName = item['strain_name'] # 
-            accession = item['acc']
+            accession = item['accession']
             similarity = r'%.2f' % (item['similarity']*100.0)
             diffTotalNt = str(item['n_mismatch']) + '/' + str(item['n_compared'])
             hitTaxonomy = item['taxonomy']
@@ -51,10 +51,13 @@ def AddMatchToCSV(name, seqMatch, file):
 
 def Run():
     # 获取序列
-    if len(sys.argv) < 2:
-        print(r'please input the folder containing sequence files(*.txt)')
+    if len(sys.argv) < 4:
+        print(r'please input the username, password and the folder name containing sequence files(*.txt)')
         return -1
-    seqFolder = sys.argv[1] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
+    username = sys.argv[1]
+    password = sys.argv[2]
+    seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
+
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
     
@@ -64,7 +67,7 @@ def Run():
         os.remove(outputFile) # 在每次的运行前删除该文件
 
     # 登录账户    
-    match = LogIn(username=r'734851667@qq.com', password=r'wen565') # 在此处输入网站的用户名及密码
+    match = LogIn(username=username, password=password) # 在此处输入网站的用户名及密码
     if not match:
         print(r'fail to log in the EzbioCloud.net')
         return -1
