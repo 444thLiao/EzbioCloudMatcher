@@ -5,14 +5,16 @@ import sys
 import os
 from os.path import *
 from WebSeqMatch import EzbioCloudMatch, LogIn
-from WebSeqMatch import Sequence
 from glob import glob
 from Bio import SeqIO
 from tqdm import tqdm 
 
 
 def RetrieveAllSeqFiles(folder):
-    files = glob(join(folder,'*.fasta'))
+    if isfile(folder):
+        files = [folder]
+    elif isdir(folder):
+        files = glob(join(folder,'*.fasta'))
     return files
 
 def RetrieveAllSeq(seqFiles):
@@ -49,14 +51,15 @@ def Run():
     username = sys.argv[1]
     password = sys.argv[2]
     seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
-
-    "1155136557@link.cuhk.edu.hk" "bioliaoth" "seq"
     
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
     
     # 开始
-    outputFile = r'.\matchResults.csv' # sys.argv[2]
+    if not '/' in seqFolder:
+        seqFolder = './' + seqFolder
+    odir = dirname(seqFolder)
+    outputFile = join(odir,r'matchResults.csv')
     if os.path.exists(outputFile):
         os.remove(outputFile) # 在每次的运行前删除该文件
 
