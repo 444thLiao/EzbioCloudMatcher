@@ -26,14 +26,14 @@ def RetrieveAllSeq(seqFiles):
 def AddMatchToCSV(name, seqMatch, file):
     if not exists(file):
         with open(file,'w') as f:
-            f.write('\t'.join('sequence ID',
+            f.write('\t'.join(['sequence ID',
                      'taxon_name',
                      'strain_name',
                      'accession',
                      'similarity',
                      'diffTotalNt',
                      'hitTaxonomy',
-                     'completeness'))
+                     'completeness']))
     else:
         with open(file, 'a') as f:
             for item in seqMatch:
@@ -49,8 +49,8 @@ def AddMatchToCSV(name, seqMatch, file):
                 else:
                     completeness = r'%.1f' % (item['completeness'] * 100.0)
 
-                text = '\t'.join(map(str,(name, hitTaxonName, hitStrainName, accession
-                , similarity, diffTotalNt, hitTaxonomy, completeness)))
+                text = '\t'.join(list(map(str,(name, hitTaxonName, hitStrainName, accession
+                , similarity, diffTotalNt, hitTaxonomy, completeness))))
                 f.write(text+'\n')
 
 def Run():
