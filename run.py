@@ -26,7 +26,7 @@ def RetrieveAllSeq(seqFiles):
 def AddMatchToCSV(name, seqMatch, file):
     if not exists(file):
         with open(file,'w') as f:
-            f1.write('\t'.join('sequence ID',
+            f.write('\t'.join('sequence ID',
                      'taxon_name',
                      'strain_name',
                      'accession',
