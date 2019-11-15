@@ -33,7 +33,7 @@ def AddMatchToCSV(name, seqMatch, file):
                      'similarity',
                      'diffTotalNt',
                      'hitTaxonomy',
-                     'completeness']))
+                     'completeness']) + '\n')
     else:
         with open(file, 'a') as f:
             for item in seqMatch:

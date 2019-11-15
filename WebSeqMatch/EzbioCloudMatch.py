@@ -71,10 +71,13 @@ class EzbioCloudMatch:
 
     def MatchSeq(self, name, seq):
         '''封装函数，主要的对外接口，其他函数用于'''
-        # 提交序列
-        id = self.CommitSeq(name, seq)
-        if not id:
-            return None
+        # try to get uid incase submit before....
+        strainUid = self.GetStrainID(-1, name)
+        if not strainUid:
+            # 提交序列
+            id = self.CommitSeq(name, seq)
+            if not id:
+                return None
         # 查询序列完成的strainUid
         # time.sleep(3) # 等待提交的匹配完成
         strainUid = None
@@ -84,7 +87,7 @@ class EzbioCloudMatch:
             if strainUid:
                 break
             else:
-                time.sleep(3)
+                time.sleep(1)
                 count += 1
             if count >= 10:
                 return None            
