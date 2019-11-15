@@ -145,7 +145,8 @@ class EzbioCloudMatch:
             'Connection': CONNECTION
         }
         #time.sleep(1000)
-        request = requests.get(r'https://www.ezbiocloud.net/cl16s/get_user_jobs?finished_up_to=%s' % (id), headers=headers) # 1546958535691
+        request = requests.get(r'https://www.ezbiocloud.net/cl16s/get_user_jobs?finished_up_to=%s' % (id), 
+                               headers=headers) # 1546958535691
         if request.status_code != 200:
             return None
         jsonStr = None

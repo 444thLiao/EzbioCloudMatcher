@@ -25,8 +25,8 @@ def RetrieveAllSeq(seqFiles):
 
 def AddMatchToCSV(name, seqMatch, file):
     if not exists(file):
-        with open(file,'w') as f:
-            f.write('\t'.join(['sequence ID',
+        f = open(file,'w')
+        f.write('\t'.join(['sequence ID',
                      'taxon_name',
                      'strain_name',
                      'accession',
@@ -35,24 +35,25 @@ def AddMatchToCSV(name, seqMatch, file):
                      'hitTaxonomy',
                      'completeness']) + '\n')
     else:
-        with open(file, 'a') as f:
-            for item in seqMatch:
-                hitTaxonName = item['taxon_name']
-                hitStrainName = item['strain_name'] # 
-                accession = item['accession']
-                similarity = r'%.2f' % (item['similarity']*100.0)
-                diffTotalNt = str(item['n_mismatch']) + '/' + str(item['n_compared'])
-                hitTaxonomy = item['taxonomy']
-                completeness = None
-                if item['completeness'] == 0:
-                    completeness = 'N/A'
-                else:
-                    completeness = r'%.1f' % (item['completeness'] * 100.0)
+        f = open(file, 'a')
+    for item in seqMatch:
+        hitTaxonName = item['taxon_name']
+        hitStrainName = item['strain_name'] # 
+        accession = item['accession']
+        similarity = r'%.2f' % (item['similarity']*100.0)
+        diffTotalNt = str(item['n_mismatch']) + '/' + str(item['n_compared'])
+        hitTaxonomy = item['taxonomy']
+        completeness = None
+        if item['completeness'] == 0:
+            completeness = 'N/A'
+        else:
+            completeness = r'%.1f' % (item['completeness'] * 100.0)
 
-                text = '\t'.join(list(map(str,(name, hitTaxonName, hitStrainName, accession
-                , similarity, diffTotalNt, hitTaxonomy, completeness))))
-                f.write(text+'\n')
-
+        text = '\t'.join(list(map(str,(name, hitTaxonName, hitStrainName, accession
+        , similarity, diffTotalNt, hitTaxonomy, completeness))))
+        f.write(text+'\n')
+        f.flush()
+    f.close()
 def Run():
     # 获取序列
     if len(sys.argv) < 4:
@@ -61,7 +62,9 @@ def Run():
     username = sys.argv[1]
     password = sys.argv[2]
     seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
-    
+    username = '1155136557@link.cuhk.edu.hk'
+    password = '12345678'
+    seqFolder = '/home-user/thliao/data/jjtao_20191113/16S.fasta'
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
     
@@ -70,8 +73,8 @@ def Run():
         seqFolder = './' + seqFolder
     odir = dirname(seqFolder)
     outputFile = join(odir,r'matchResults.csv')
-    if os.path.exists(outputFile):
-        os.remove(outputFile) # 在每次的运行前删除该文件
+    # if os.path.exists(outputFile):
+    #     os.remove(outputFile) # 在每次的运行前删除该文件
 
     # 登录账户    
     match = LogIn(username=username, password=password) # 在此处输入网站的用户名及密码
