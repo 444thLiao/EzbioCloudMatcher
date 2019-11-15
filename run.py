@@ -1,32 +1,24 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sys
 import os
-
+from os.path import *
 from WebSeqMatch import EzbioCloudMatch, LogIn
 from WebSeqMatch import Sequence
+from glob import glob
+from Bio import SeqIO
+from tqdm import tqdm 
+
 
 def RetrieveAllSeqFiles(folder):
-    tempFiles = os.listdir(folder)
-    files = []
-    for file in tempFiles:
-        try:
-            fileExt = os.path.splitext(file)[1]
-            if fileExt.lower() == '.txt' or fileExt.lower() == '.seq':
-                files.append(folder + '\\' + file)
-        except:
-            pass        
+    files = glob(join(folder,'*.fasta'))
     return files
 
 def RetrieveAllSeq(seqFiles):
-    seqs = []
-    for item in seqFiles:
-        seq = Sequence(item.split('\\')[-1].split('.')[0])
-        if seq.LoadFrTxt(item):
-            seqs.append(seq)
-        else:
-            pass
+    seqs = [r 
+            for _ in seqFiles 
+            for r in SeqIO.parse(_,format='fasta')]
     return seqs
 
 def AddMatchToCSV(name, seqMatch, file):
@@ -58,6 +50,8 @@ def Run():
     password = sys.argv[2]
     seqFolder = sys.argv[3] # 文件夹中包含很多txt文件，每个txt文件为一个基于序列
 
+    "1155136557@link.cuhk.edu.hk" "bioliaoth" "seq"
+    
     seqFiles = RetrieveAllSeqFiles(seqFolder) # 所有带有序列的文件
     seqs = RetrieveAllSeq(seqFiles) # 获取到所有序列
     
@@ -73,15 +67,12 @@ def Run():
         return -1
 
     # 开始匹配
-    count = 0
-    for seq in seqs:        
-        matchResult = match.MatchSeq(name=seq.name, seq=seq.seq)
+    for seq in tqdm(seqs):        
+        matchResult = match.MatchSeq(name=seq.id, seq=str(seq.seq))
         if matchResult:
-            AddMatchToCSV(seq.name, matchResult, outputFile)
-            count += 1
-            print(r'已完成%d/%d个匹配: %s' % (count, len(seqs), seq.name))
+            AddMatchToCSV(seq.id, matchResult, outputFile)
         else:
-            print(r"'%s'匹配失败" % (seq.name))
+            tqdm.write('failed %s' % seq.id)
     print(r'已执行完毕')
 
 if __name__ == '__main__':

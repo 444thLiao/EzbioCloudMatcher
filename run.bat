@@ -1,1 +1,0 @@
-run.py "qsl@vip.henu.edu.cn" "123456789" "seq"

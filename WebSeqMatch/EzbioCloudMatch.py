@@ -111,7 +111,7 @@ class EzbioCloudMatch:
         data = data + r'%22%2C%22ssurrn_seq%22%3A%22'
         data = data + seq
         data = data + r'%22%7D%5D'    
-        time.sleep(1000)
+        #time.sleep(1000)
         request = requests.post(r'https://www.ezbiocloud.net/cl16s/submit_identify_data', headers=headers, data=data)
         if request.status_code < 200 or request.status_code >= 300:
             return None
@@ -141,7 +141,7 @@ class EzbioCloudMatch:
             'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
-        time.sleep(1000)
+        #time.sleep(1000)
         request = requests.get(r'https://www.ezbiocloud.net/cl16s/get_user_jobs?finished_up_to=%s' % (id), headers=headers) # 1546958535691
         if request.status_code != 200:
             return None
@@ -181,7 +181,7 @@ class EzbioCloudMatch:
             'Cookie': self.__cookies,
             'Connection': CONNECTION
         }
-        time.sleep(1000)
+        #time.sleep(1000)
         request = requests.get(r'https://www.ezbiocloud.net/identify/result?id=%s' % (strainID), headers=headers)
         if request.status_code != 200:
             return None
