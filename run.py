@@ -24,24 +24,34 @@ def RetrieveAllSeq(seqFiles):
     return seqs
 
 def AddMatchToCSV(name, seqMatch, file):
-    with open(file, 'a') as f:
-        for item in seqMatch:
-            hitTaxonName = item['taxon_name']
-            hitStrainName = item['strain_name'] # 
-            accession = item['accession']
-            similarity = r'%.2f' % (item['similarity']*100.0)
-            diffTotalNt = str(item['n_mismatch']) + '/' + str(item['n_compared'])
-            hitTaxonomy = item['taxonomy']
-            completeness = None
-            if item['completeness'] == 0:
-                completeness = 'N/A'
-            else:
-                completeness = r'%.1f' % (item['completeness'] * 100.0)
+    if not exists(file):
+        with open(file,'w') as f:
+            f1.write('\t'.join('sequence ID',
+                     'taxon_name',
+                     'strain_name',
+                     'accession',
+                     'similarity',
+                     'diffTotalNt',
+                     'hitTaxonomy',
+                     'completeness'))
+    else:
+        with open(file, 'a') as f:
+            for item in seqMatch:
+                hitTaxonName = item['taxon_name']
+                hitStrainName = item['strain_name'] # 
+                accession = item['accession']
+                similarity = r'%.2f' % (item['similarity']*100.0)
+                diffTotalNt = str(item['n_mismatch']) + '/' + str(item['n_compared'])
+                hitTaxonomy = item['taxonomy']
+                completeness = None
+                if item['completeness'] == 0:
+                    completeness = 'N/A'
+                else:
+                    completeness = r'%.1f' % (item['completeness'] * 100.0)
 
-            text = '%s,%s,%s,%s,%s,%s,%s,%s\n' % (name, hitTaxonName, hitStrainName, accession
-            , similarity, diffTotalNt, hitTaxonomy, completeness)
-            f.write(text)
-        f.write('\n\n')
+                text = '\t'.join(map(str,(name, hitTaxonName, hitStrainName, accession
+                , similarity, diffTotalNt, hitTaxonomy, completeness)))
+                f.write(text+'\n')
 
 def Run():
     # 获取序列
