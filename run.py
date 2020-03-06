@@ -118,7 +118,7 @@ def Run():
     print(f"detect {len(same_genome+diff_genome)} genomes with multiple 16S")
     print(f"Only {len(diff_genome)} genomes with different annotated 16S(in genera level)... And they might be polluted and will be filterout ")
     print(f"Left {len(same_genome)} genomes have multiple but same annotation, multiple 16S would be random retained one of them")
-    print(f"Final filtered annotation table would output with name '' ")
+    print(f"Final filtered annotation table would output with name '{outputFile2}'")
     sub_df = df.loc[~df.iloc[:,0].isin(drop_seq),:]
     sub_df.to_csv(outputFile2,index=False,sep='\t')
     
